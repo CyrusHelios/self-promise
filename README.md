@@ -1,2 +1,3 @@
 # self-promise
-Promise origin code
+
+Promise source code
