@@ -106,26 +106,41 @@ export default class SelfPromise {
     };
 
     then(onFulfilled, onRejected) {
-        // onFulfilled 回调函数的默认值，then 方法值传递的原理
-        onFulfilled =
-            typeof onFulfilled === "function" ? onFulfilled : (value) => value;
-        // onRejected 回调函数的默认值，then 方法值传递的原理
-        onRejected =
-            typeof onRejected === "function"
-                ? onRejected
-                : (reason) => {
-                      throw reason;
-                  };
-
         const promise2 = new SelfPromise((resolve, reject) => {
+            // onFulfilled 回调函数的默认值，then 方法值传递的原理
+            onFulfilled =
+                typeof onFulfilled === "function"
+                    ? onFulfilled
+                    : (value) => value;
+            // onRejected 回调函数的默认值，then 方法值传递的原理
+            onRejected =
+                typeof onRejected === "function"
+                    ? onRejected
+                    : (reason) => {
+                          reject(reason);
+                      };
+
             // 异步执行，等待 promise2 的完成初始化
             const fulfilledMicrotask = () => {
                 queueMicrotask(() => {
                     try {
-                        // 获取上一个 then 方法的 fulfilled 回调函数的返回值
-                        const v = onFulfilled(this.value);
-                        // 根据返回值，改变 promise2 的状态，并建立与下一个 then 方法的关系
-                        resolvePromise(promise2, v, resolve, reject);
+                        if (
+                            this.value &&
+                            typeof this.value.then === "function"
+                        ) {
+                            // 如果 resolve 函数传入的值是 Promise 对象或 thenable 对象
+                            resolvePromise(
+                                null,
+                                this.value,
+                                onFulfilled,
+                                onRejected
+                            );
+                        } else {
+                            // 获取上一个 then 方法的 fulfilled 回调函数的返回值
+                            const v = onFulfilled(this.value);
+                            // 根据返回值，改变 promise2 的状态，并建立与下一个 then 方法的关系
+                            resolvePromise(promise2, v, resolve, reject);
+                        }
                     } catch (error) {
                         reject(error);
                     }
