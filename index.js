@@ -117,7 +117,7 @@ export default class SelfPromise {
                 typeof onRejected === "function"
                     ? onRejected
                     : (reason) => {
-                          reject(reason);
+                          throw reason;
                       };
 
             // 异步执行，等待 promise2 的完成初始化
