@@ -129,11 +129,16 @@ export default class SelfPromise {
                             typeof this.value.then === "function"
                         ) {
                             // 如果 resolve 函数传入的值是 Promise 对象或 thenable 对象
-                            resolvePromise(
-                                null,
-                                this.value,
-                                onFulfilled,
-                                onRejected
+                            // 需要在其 then 方法的回调函数中调用 onFulfilled 和 onRejected
+                            this.value.then(
+                                (value) => {
+                                    const v = onFulfilled(value);
+                                    resolvePromise(promise2, value, resolve, reject);
+                                },
+                                (error) => {
+                                    const v = onRejected(error);
+                                    resolvePromise(promise2, error, resolve, reject);
+                                }
                             );
                         } else {
                             // 获取上一个 then 方法的 fulfilled 回调函数的返回值
