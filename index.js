@@ -133,11 +133,21 @@ export default class SelfPromise {
                             this.value.then(
                                 (value) => {
                                     const v = onFulfilled(value);
-                                    resolvePromise(promise2, value, resolve, reject);
+                                    resolvePromise(
+                                        promise2,
+                                        value,
+                                        resolve,
+                                        reject
+                                    );
                                 },
                                 (error) => {
                                     const v = onRejected(error);
-                                    resolvePromise(promise2, error, resolve, reject);
+                                    resolvePromise(
+                                        promise2,
+                                        error,
+                                        resolve,
+                                        reject
+                                    );
                                 }
                             );
                         } else {
@@ -183,13 +193,16 @@ export default class SelfPromise {
         return this.then(null, callback);
     }
     finally(callback) {
-        // 值穿透以及 callback() 返回值不会传递给后面 then 方法的原理
         return this.then(
-            (value) => SelfPromise.resolve(callback()).then(() => value),
-            (reason) =>
-                SelfPromise.resolve(callback()).then(() => {
-                    throw reason;
-                })
+            // 值穿透以及 callback() 返回值不会传递给后面 then 方法的原理
+            (value) => {
+                callback();
+                return MyPromise.resolve(value);
+            },
+            (reason) => {
+                callback();
+                return MyPromise.reject(reason);
+            }
         );
     }
 
