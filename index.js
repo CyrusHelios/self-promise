@@ -135,7 +135,7 @@ export default class SelfPromise {
                                     const v = onFulfilled(value);
                                     resolvePromise(
                                         promise2,
-                                        value,
+                                        v,
                                         resolve,
                                         reject
                                     );
@@ -144,7 +144,7 @@ export default class SelfPromise {
                                     const v = onRejected(error);
                                     resolvePromise(
                                         promise2,
-                                        error,
+                                        v,
                                         resolve,
                                         reject
                                     );
